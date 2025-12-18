@@ -30,6 +30,8 @@ type Assignment = {
   assetStatus: Asset["status"];
   employeeName: string;
   employeeEmail: string;
+  managerDescription?: string | null;
+  employeeDescription?: string | null;
 };
 
 type User = {
@@ -60,6 +62,7 @@ export default function ManagerScreen() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [selectedUpdate, setSelectedUpdate] = useState<Assignment | null>(null);
 
   const availableAssets = assets.filter((a) => a.status === "AVAILABLE");
 
@@ -485,6 +488,7 @@ export default function ManagerScreen() {
                     <th className="px-3 py-2 font-medium">Issued</th>
                     <th className="px-3 py-2 font-medium">Returned</th>
                     <th className="px-3 py-2 font-medium">Status</th>
+                    <th className="px-3 py-2 font-medium text-center">Updates</th>
                     <th className="px-3 py-2 font-medium text-right">
                       Lifecycle
                     </th>
@@ -553,6 +557,18 @@ export default function ManagerScreen() {
                           </span>
                         )}
                       </td>
+                      <td className="px-3 py-2 text-center">
+                        {a.employeeDescription ? (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedUpdate(a)}
+                            title="View employee update"
+                            className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-sky-400/90 hover:scale-110"
+                          />
+                        ) : (
+                          <span className="inline-block h-3 w-3 rounded-full bg-transparent" />
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -561,6 +577,65 @@ export default function ManagerScreen() {
           )}
         </div>
       </div>
+      {selectedUpdate && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 px-4">
+          <div className="w-full max-w-lg rounded-2xl border border-slate-800 bg-slate-950/95 p-6 shadow-2xl">
+            <div className="mb-4 flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-50">Employee update</h3>
+                <p className="text-xs text-slate-400">Details submitted by the employee.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedUpdate(null)}
+                className="rounded-full border border-slate-700 bg-slate-900 px-2 py-1 text-xs text-slate-300 hover:bg-slate-800"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="space-y-4 text-sm text-slate-100">
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Asset</div>
+                <div className="mt-1 text-sm font-semibold">{selectedUpdate.assetName}</div>
+                <div className="text-xs text-slate-400">{selectedUpdate.assetType}{selectedUpdate.serialNumber ? ` · ${selectedUpdate.serialNumber}` : ""}</div>
+              </div>
+
+              <div>
+                <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Submitted by</div>
+                <div className="mt-1 text-sm">{selectedUpdate.employeeName}</div>
+                <div className="text-xs text-slate-400">{selectedUpdate.employeeEmail}</div>
+              </div>
+
+              {(() => {
+                const combined = selectedUpdate.employeeDescription || "";
+                const match = combined.match(/^Status:\s*(.*)\n([\s\S]*)$/);
+                const status = match ? match[1] : "N/A";
+                const desc = match ? match[2] : combined;
+                return (
+                  <>
+                    <div>
+                      <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Status</div>
+                      <div className="mt-1">
+                        <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${status === "DAMAGED" ? "bg-amber-500/10 text-amber-200 border border-amber-500/40" : status === "COMPLETED" ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/40" : "bg-slate-500/10 text-slate-300 border border-slate-500/40"}`}>
+                          {status}
+                        </span>
+                      </div>
+                    </div>
+
+                    {desc && (
+                      <div>
+                        <div className="text-[11px] font-medium uppercase tracking-[0.16em] text-slate-400">Description</div>
+                        <p className="mt-1 whitespace-pre-wrap text-xs text-slate-200">{desc}</p>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

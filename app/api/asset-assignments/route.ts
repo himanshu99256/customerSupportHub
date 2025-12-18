@@ -17,6 +17,8 @@ export async function GET(_request: NextRequest) {
         a.type AS assetType,
         a.serial_number AS serialNumber,
         a.status AS assetStatus,
+        a.m_desc AS managerDescription,
+        a.e_desc AS employeeDescription,
         u.name AS employeeName,
         u.email AS employeeEmail,
         m.name AS managerName,
