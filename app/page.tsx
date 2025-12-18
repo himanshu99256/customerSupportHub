@@ -1,7 +1,11 @@
 import Link from "next/link";
+import RootRedirect from "@/components/RootRedirect";
 
 export default function Home() {
   return (
+    <>
+      <RootRedirect />
+    
     <div className="w-full max-w-5xl mx-auto">
       <div className="grid gap-10 md:grid-cols-[minmax(0,1.6fr),minmax(0,1fr)] items-center">
         <div className="space-y-6">
@@ -125,6 +129,7 @@ export default function Home() {
         </div>
       </div>
     </div>
+    </>
   );
 }
 

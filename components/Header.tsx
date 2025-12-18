@@ -38,8 +38,8 @@ export default function Header() {
   const isHomePage = pathname === "/";
 
   return (
-    <header className="w-full border-b border-slate-800/80 bg-slate-950/60 backdrop-blur-xl">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+    <header className="w-full fixed top-0 left-0 right-0 z-50 border-b border-slate-800/80 bg-slate-950/90 backdrop-blur-xl shadow-lg">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 h-20">
         <Link
           href="/"
           className="flex items-center gap-2 text-sm font-semibold text-slate-50 transition hover:text-sky-400"
