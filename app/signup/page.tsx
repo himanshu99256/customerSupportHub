@@ -52,14 +52,23 @@ export default function SignupPage() {
         return;
       }
 
-      // Store token in localStorage
+      // Store token and user in localStorage
       if (data.token) {
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
       }
 
-      // Redirect to dashboard or home page
-      window.location.href = "/dashboard";
+      // Redirect based on user role
+      const role = data.user?.role;
+      if (role === "EMPLOYEE") {
+        window.location.href = "/employee";
+      } else if (role === "MANAGER") {
+        window.location.href = "/manager";
+      } else if (role === "ADMIN") {
+        window.location.href = "/admin";
+      } else {
+        window.location.href = "/";
+      }
     } catch (err: any) {
       setError("Network error. Please check your connection and try again.");
       setIsLoading(false);

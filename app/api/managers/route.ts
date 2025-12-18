@@ -3,7 +3,7 @@ import { query } from "@/lib/db";
 
 export async function GET(_request: NextRequest) {
   try {
-    const employees = (await query(
+    const managers = (await query(
       `SELECT 
         id, 
         name, 
@@ -12,18 +12,17 @@ export async function GET(_request: NextRequest) {
         created_at AS createdAt,
         updated_at AS updatedAt
       FROM users 
-      WHERE role = 'EMPLOYEE' 
+      WHERE role = 'MANAGER' 
       ORDER BY name ASC`
     )) as any[];
 
-    return NextResponse.json({ employees });
+    return NextResponse.json({ managers });
   } catch (error: any) {
-    console.error("Fetch employees error:", error);
+    console.error("Fetch managers error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch employees", details: error.message },
+      { error: "Failed to fetch managers", details: error.message },
       { status: 500 }
     );
   }
 }
-
 

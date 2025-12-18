@@ -32,7 +32,15 @@ type Assignment = {
   employeeEmail: string;
 };
 
+type User = {
+  id: number;
+  name: string;
+  email: string;
+  role: string;
+};
+
 export default function ManagerScreen() {
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assets, setAssets] = useState<Asset[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -47,12 +55,26 @@ export default function ManagerScreen() {
     ""
   );
   const [selectedAssetId, setSelectedAssetId] = useState<number | "">("");
+  const [assignmentDescription, setAssignmentDescription] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
   const availableAssets = assets.filter((a) => a.status === "AVAILABLE");
+
+  useEffect(() => {
+    const stored = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (stored) {
+      try {
+        setCurrentUser(JSON.parse(stored));
+      } catch {
+        setCurrentUser(null);
+      }
+    } else {
+      setCurrentUser(null);
+    }
+  }, []);
 
   async function loadData() {
     try {
@@ -127,6 +149,11 @@ export default function ManagerScreen() {
       return;
     }
 
+    if (!currentUser) {
+      setError("You must be signed in as a manager to assign assets");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -136,6 +163,8 @@ export default function ManagerScreen() {
         body: JSON.stringify({
           assetId: selectedAssetId,
           userId: selectedEmployeeId,
+          assignedById: currentUser.id,
+          managerDescription: assignmentDescription || null,
         }),
       });
 
@@ -148,6 +177,7 @@ export default function ManagerScreen() {
       setSuccess("Asset assigned");
       setSelectedAssetId("");
       setSelectedEmployeeId("");
+      setAssignmentDescription("");
       await loadData();
     } catch (err: any) {
       setError(err.message || "Failed to assign asset");
@@ -387,6 +417,23 @@ export default function ManagerScreen() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="assignment-notes"
+                  className="block text-xs font-medium uppercase tracking-[0.16em] text-slate-300"
+                >
+                  Description (optional)
+                </label>
+                <textarea
+                  id="assignment-notes"
+                  value={assignmentDescription}
+                  onChange={(e) => setAssignmentDescription(e.target.value)}
+                  rows={3}
+                  className="w-full rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-2.5 text-sm text-slate-50 shadow-sm outline-none ring-0 transition placeholder:text-slate-500 focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/60"
+                  placeholder="Why this asset is being assigned, special instructions, etc."
+                />
               </div>
 
               <button

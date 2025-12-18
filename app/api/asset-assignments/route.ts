@@ -9,6 +9,7 @@ export async function GET(_request: NextRequest) {
         aa.id,
         aa.asset_id AS assetId,
         aa.user_id AS userId,
+        aa.assigned_by AS assignedById,
         aa.assigned_at AS assignedAt,
         aa.returned_at AS returnedAt,
         aa.status,
@@ -17,10 +18,13 @@ export async function GET(_request: NextRequest) {
         a.serial_number AS serialNumber,
         a.status AS assetStatus,
         u.name AS employeeName,
-        u.email AS employeeEmail
+        u.email AS employeeEmail,
+        m.name AS managerName,
+        m.email AS managerEmail
       FROM asset_assignments aa
       JOIN assets a ON aa.asset_id = a.id
       JOIN users u ON aa.user_id = u.id
+      JOIN users m ON aa.assigned_by = m.id
       ORDER BY aa.assigned_at DESC
       LIMIT 50`
     )) as any[];
@@ -39,7 +43,12 @@ export async function GET(_request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { assetId, userId } = body;
+    const { assetId, userId, assignedById, managerDescription } = body as {
+      assetId?: number;
+      userId?: number;
+      assignedById?: number;
+      managerDescription?: string | null;
+    };
 
     if (!assetId || !userId) {
       return NextResponse.json(
@@ -47,6 +56,8 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    const effectiveAssignedById = assignedById ?? userId;
 
     // Ensure asset is available
     const assets = (await query(
@@ -68,16 +79,17 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Insert assignment (assigned_by same as user for now)
+    // Insert assignment
     await query(
       "INSERT INTO asset_assignments (asset_id, user_id, assigned_by, status) VALUES (?, ?, ?, 'ACTIVE')",
-      [assetId, userId, userId]
+      [assetId, userId, effectiveAssignedById]
     );
 
-    // Update asset status
-    await query("UPDATE assets SET status = 'ASSIGNED' WHERE id = ?", [
-      assetId,
-    ]);
+    // Update asset status and manager description
+    await query(
+      "UPDATE assets SET status = 'ASSIGNED', m_desc = ? WHERE id = ?",
+      [managerDescription ?? null, assetId]
+    );
 
     return NextResponse.json(
       { message: "Asset assigned successfully" },
