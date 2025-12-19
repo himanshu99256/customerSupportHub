@@ -6,7 +6,7 @@ export default function Home() {
     <>
       <RootRedirect />
     
-    <div className="w-full max-w-5xl mx-auto">
+    <div className="w-full max-w-5xl mx-auto mt-12">
       <div className="grid gap-10 md:grid-cols-[minmax(0,1.6fr),minmax(0,1fr)] items-center">
         <div className="space-y-6">
           <span className="inline-flex items-center rounded-full border border-slate-800/80 bg-slate-900/70 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-slate-300/80 shadow-sm backdrop-blur">
